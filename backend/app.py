@@ -1,7 +1,8 @@
-# backend/app.py
-
+from dotenv import load_dotenv
+load_dotenv()
 from flask import Flask, jsonify
 from flask_cors import CORS
+
 
 # Важно: импортируем наши сервисы, чтобы убедиться, что Firebase инициализирован при старте
 from firebase_service import db, bucket

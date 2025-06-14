@@ -1,106 +1,70 @@
-// frontend/js/profile.js
-
 /**
- * Отрисовывает страницу профиля пользователя
+ * Отрисовывает страницу профиля пользователя.
  * @param {HTMLElement} container - Элемент для рендеринга
  */
 function renderProfilePage(container) {
     const tg = window.Telegram.WebApp;
+    // Данные пользователя берем напрямую из Telegram для мгновенного отображения
     const user = tg.initDataUnsafe.user;
 
+    // Формируем базовый HTML страницы без списка избранного
     container.innerHTML = `
         <div class="profile-page">
             <div class="profile-header">
-                <img src="${user?.photo_url || ''}" alt="Avatar" class="profile-avatar">
+                <img src="${user?.photo_url || 'assets/default-avatar.png'}" alt="Avatar" class="profile-avatar" onerror="this.src='assets/default-avatar.png';">
                 <h1 class="profile-username">${user?.first_name || 'User'} ${user?.last_name || ''}</h1>
                 <p class="profile-telegram-id">@${user?.username || 'username'}</p>
             </div>
 
             <div class="profile-actions">
                 <button id="submit-app-button" class="action-button">Предложить приложение</button>
-            </div>
-
-            <div id="favorites-section">
-                <h2 class="section-title">Избранное</h2>
-                <div id="favorites-container" class="cards-container">
-                    <div class="loader"></div>
                 </div>
-            </div>
         </div>
     `;
+    
+    // Вызываем отдельную функцию для проверки статуса администратора
+    checkAndAddAdminButton();
 
-    loadUserFavorites(document.getElementById('favorites-container'));
-
+    // Навешиваем событие на кнопку предложения приложения
     document.getElementById('submit-app-button').addEventListener('click', () => {
         showSubmissionModal();
     });
 }
 
 /**
- * Загружает и отрисовывает избранные приложения пользователя
- * @param {HTMLElement} favoritesContainer - Контейнер для карточек
+ * Делает запрос к API, чтобы проверить, является ли пользователь админом,
+ * и если да, то добавляет кнопку входа в админ-панель.
  */
-async function loadUserFavorites(favoritesContainer) {
-    const tg = window.Telegram.WebApp;
-
+async function checkAndAddAdminButton() {
     try {
-        // 1. Получаем данные пользователя
-        const userResponse = await fetch(`${API_BASE_URL}/api/user`, {
-            headers: { 'X-Telegram-Init-Data': tg.initData }
+        const response = await fetch(`${API_BASE_URL}/api/user`, {
+            headers: { 'X-Telegram-Init-Data': window.Telegram.WebApp.initData }
         });
-        if (!userResponse.ok) throw new Error('Failed to fetch user data');
-        const userData = await userResponse.json();
+        // Если запрос не прошел или пользователь не авторизован, ничего не делаем
+        if (!response.ok) return; 
 
-        // *** НАЧАЛО ИЗМЕНЕНИЙ ***
-        // Проверяем, является ли пользователь админом
+        const userData = await response.json();
+
+        // Если пользователь админ, и кнопки еще нет на странице
         if (userData.is_admin) {
             const profileActions = document.querySelector('.profile-actions');
-            const adminButton = document.createElement('button');
-            adminButton.id = 'admin-panel-button';
-            adminButton.className = 'action-button secondary'; // Добавим другой стиль
-            adminButton.textContent = 'Панель администратора';
-            adminButton.addEventListener('click', () => navigateTo('admin'));
-            
-            // Вставляем кнопку админа после кнопки "Предложить приложение"
-            profileActions.appendChild(adminButton);
+            if (profileActions && !document.getElementById('admin-panel-button')) {
+                const adminButton = document.createElement('button');
+                adminButton.id = 'admin-panel-button';
+                adminButton.className = 'action-button secondary';
+                adminButton.textContent = 'Панель администратора';
+                adminButton.addEventListener('click', () => navigateTo('admin'));
+                profileActions.appendChild(adminButton);
+            }
         }
-        // *** КОНЕЦ ИЗМЕНЕНИЙ ***
-
-        const favoriteIds = new Set(userData.favorites || []);
-
-        if (favoriteIds.size === 0) {
-            favoritesContainer.innerHTML = '<p class="hint-text">Вы еще не добавили ничего в избранное.</p>';
-            return;
-        }
-
-        // ... остальная часть функции без изменений ...
-        const appsResponse = await fetch(`${API_BASE_URL}/api/apps`);
-        if (!appsResponse.ok) throw new Error('Failed to fetch apps');
-        const allApps = await appsResponse.json();
-
-        const favoriteApps = allApps.filter(app => favoriteIds.has(app.id));
-        
-        favoritesContainer.innerHTML = ''; 
-
-        if (favoriteApps.length === 0) {
-            favoritesContainer.innerHTML = '<p class="hint-text">Здесь пока пусто.</p>';
-            return;
-        }
-
-        favoriteApps.forEach(app => {
-            const appCard = createAppCard(app);
-            favoritesContainer.appendChild(appCard);
-        });
-
     } catch (error) {
-        console.error(error);
-        favoritesContainer.innerHTML = '<p class="error-text">Не удалось загрузить избранное.</p>';
+        // В случае ошибки просто не показываем кнопку, чтобы не мешать пользователю
+        console.error("Failed to check admin status:", error);
     }
 }
 
-/**
- * Показывает модальное окно для отправки заявки
- */
+
+// Эти функции для модального окна остаются без изменений
 function showSubmissionModal() {
     const modalHtml = `
         <div id="submission-modal-overlay" class="modal-overlay">
@@ -133,14 +97,9 @@ function showSubmissionModal() {
     const form = document.getElementById('submission-form');
     const cancelButton = document.getElementById('cancel-button');
 
-    // Закрытие модального окна
     const closeModal = () => overlay.remove();
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) closeModal();
-    });
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
     cancelButton.addEventListener('click', closeModal);
-
-    // Обработка отправки формы
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         handleFormSubmit(new FormData(form), closeModal);

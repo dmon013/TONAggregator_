@@ -50,9 +50,9 @@ def get_test_data():
     # 4. Пользователи
     users = [
         # Пользователь-администратор
-        {'id': '123456789', 'telegram_id': 123456789, 'username': 'admin_user', 'photo_url': 'https://placehold.co/128x128/red/white?text=A', 'is_admin': True, 'favorites': []},
+        {'id': '123456789', 'telegram_id': 123456789, 'username': 'admin_user', 'photo_url': 'https://placehold.co/128x128/red/white?text=A', 'is_admin': True, 'my_apps': {}},
         # Обычный пользователь
-        {'id': '987654321', 'telegram_id': 987654321, 'username': 'test_user', 'photo_url': 'https://placehold.co/128x128/green/white?text=U', 'is_admin': False, 'favorites': []},
+        {'id': '987654321', 'telegram_id': 987654321, 'username': 'test_user', 'photo_url': 'https://placehold.co/128x128/green/white?text=U', 'is_admin': False, 'my_apps': {}},
     ]
 
     return categories, apps, news, users
@@ -108,9 +108,14 @@ def seed_database():
         db.collection('news').document(news_id).set(news_doc)
     print("✅ 'news' успешно заполнены.")
 
-    # 4. Заполняем пользователей и добавляем им избранное
+    # 4. Заполняем пользователей и добавляем им приложения в сетку
     print("-> Заполняем 'users'...")
-    users_data[1]['favorites'] = [app_ids[0], app_ids[2]] # Добавляем обычному юзеру пару приложений в избранное
+    # Добавляем обычному юзеру пару приложений в конкретные ячейки
+    users_data[1]['my_apps'] = {
+        "0": app_ids[0], # Catizen в первой ячейке
+        "2": app_ids[2], # TON Wallet в третьей ячейке
+        "15": app_ids[5] # Notcoin в последней ячейке
+    } 
     for user in users_data:
         db.collection('users').document(user['id']).set(user)
     print("✅ 'users' успешно заполнены.")

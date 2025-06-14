@@ -7,9 +7,22 @@ from urllib.parse import unquote, parse_qsl
 from functools import wraps
 from flask import request, jsonify, g
 
-# ВАЖНО: Храни токен бота в переменных окружения, а не в коде!
-# Для локальной разработки можно временно указать его здесь.
-BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', 'YOUR_TELEGRAM_BOT_TOKEN')
+# вот эти две штуки снизу нужны или нет?
+from functools import wraps
+from google.cloud.firestore_v1.field_path import FieldPath
+
+def get_bot_token() -> str:
+    """
+    Получает токен бота из переменных окружения.
+    Гарантированно возвращает строку или вызывает ошибку.
+    """
+    token = os.getenv('TELEGRAM_BOT_TOKEN')
+    if not token:
+        raise ValueError("Переменная TELEGRAM_BOT_TOKEN не найдена! Убедись, что она прописана в backend/.env файле и ты перезапустил сервер.")
+    return token
+
+# Получаем токен при запуске
+BOT_TOKEN = get_bot_token()
 
 from typing import Tuple
 

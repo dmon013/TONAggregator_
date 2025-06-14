@@ -1,11 +1,13 @@
+# backend/models/user_model.py
 from dataclasses import dataclass, field
-from typing import List
+from typing import Dict
 
 @dataclass
 class User:
-    id: str  # В Firestore это будет ID документа, равный telegram_id
+    id: str
     telegram_id: int
     username: str
     photo_url: str
-    favorites: List[str] = field(default_factory=list) # Список ID приложений
+    # Заменяем 'favorites' на 'my_apps' со структурой { "slot_index": "app_id" }
+    my_apps: Dict[str, str] = field(default_factory=dict)
     is_admin: bool = False

@@ -405,3 +405,217 @@ body {
     margin-bottom: 15px;
     padding: 5px 0;
 }
+
+/* Стили для вкладки "MyApp" */
+.page-subtitle {
+    font-size: 15px;
+    color: var(--tg-theme-hint-color);
+    margin: -12px 0 20px;
+}
+.my-apps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+.grid-slot {
+    width: 100%;
+    padding-top: 100%; /* Создает квадратное соотношение сторон */
+    position: relative;
+    background: rgba(222, 239, 247, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+    animation: fadeIn 0.5s ease-out;
+}
+.grid-slot:hover {
+    transform: scale(1.05);
+    background: rgba(222, 239, 247, 0.2);
+}
+.grid-slot .plus-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 36px;
+    color: var(--tg-theme-hint-color);
+    font-weight: 200;
+}
+.grid-slot.filled {
+    background: rgba(222, 239, 247, 0.3);
+}
+.grid-slot .slot-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+}
+.add-app-button {
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+.add-app-button:hover {
+    filter: brightness(1.1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* frontend/css/styles.css (добавить в конец) */
+
+/* Стили для страницы "Мои TApps" */
+.page-subtitle {
+    font-size: 15px;
+    color: var(--tg-theme-hint-color);
+    margin-top: -12px;
+    margin-bottom: 20px;
+}
+
+.my-apps-grid {
+    display: grid;
+    /* Создаем 4 колонки одинаковой ширины */
+    grid-template-columns: repeat(4, 1fr);
+    /* Задаем отступ между ячейками */
+    gap: 12px;
+}
+
+.grid-slot {
+    width: 100%;
+    /* Этот трюк с padding-top создает идеальные квадраты */
+    padding-top: 100%; 
+    position: relative;
+    background: rgba(222, 239, 247, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+    /* Анимация плавного появления */
+    animation: fadeIn 0.5s ease-out;
+}
+
+.grid-slot:hover {
+    transform: scale(1.05);
+    background: rgba(222, 239, 247, 0.2);
+}
+
+.grid-slot .plus-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 36px;
+    color: var(--tg-theme-hint-color);
+    font-weight: 200;
+    line-height: 1;
+}
+
+.grid-slot.filled {
+    background: rgba(222, 239, 247, 0.3);
+}
+
+.grid-slot .slot-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+}
+
+/* Стили для кнопки "Добавить" в поиске */
+.add-app-button {
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: filter 0.2s;
+    margin-left: auto; /* Прижимает кнопку к правому краю */
+}
+
+.add-app-button:hover {
+    filter: brightness(1.1);
+}
+.add-app-button:disabled {
+    background-color: var(--tg-theme-hint-color);
+    cursor: default;
+    filter: none;
+}
+
+
+/* Анимация появления */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+.edit-button {
+    background: none;
+    border: none;
+    color: var(--tg-theme-link-color);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px;
+}
+.edit-button.active {
+    font-weight: bold;
+}
+
+.delete-slot-button {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #E53935; /* Красный */
+    color: white;
+    border: 2px solid var(--tg-theme-bg-color);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 18px;
+    line-height: 22px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0; /* Скрыт по умолчанию */
+    transform: scale(0.5);
+    transition: all 0.2s ease-out;
+    z-index: 10;
+}
+/* Показываем крестик в режиме редактирования */
+.my-apps-grid.edit-mode .delete-slot-button {
+    opacity: 1;
+    transform: scale(1);
+}
+/* Анимация покачивания в режиме редактирования */
+.my-apps-grid.edit-mode .grid-slot.filled {
+    animation: jiggle 0.3s infinite;
+}
+@keyframes jiggle {
+    0% { transform: rotate(-1deg); }
+    50% { transform: rotate(1deg); }
+    100% { transform: rotate(-1deg); }
+}
+.add-app-button.disabled {
+    background: var(--tg-theme-hint-color);
+    color: var(--tg-theme-secondary-bg-color);
+    cursor: default;
+}
