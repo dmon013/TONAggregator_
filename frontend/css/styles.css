@@ -1,0 +1,407 @@
+/* frontend/css/styles.css */
+
+/* Переменные с цветами из дизайн-гайда Telegram */
+:root {
+    --tg-theme-bg-color: var(--tg-bg-color, #222F37);
+    --tg-theme-text-color: var(--tg-text-color, #DEEFF7);
+    --tg-theme-hint-color: var(--tg-hint-color, #b1c3d1);
+    --tg-theme-link-color: var(--tg-link-color, #2AABEE);
+    --tg-theme-button-color: var(--tg-button-color, #2AABEE);
+    --tg-theme-button-text-color: var(--tg-button-text-color, #ffffff);
+    --tg-theme-secondary-bg-color: var(--tg-secondary-bg-color, #17212b);
+
+    /* Наши кастомные цвета для элементов */
+    --card-bg-color: rgba(222, 239, 247, 0.08);
+    --border-color: rgba(222, 239, 247, 0.15);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+    font-family: 'Roboto', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior: none; /* Убирает "оттягивание" страницы на мобильных */
+    padding-bottom: 70px; /* Оставляем место для нижней навигации */
+}
+
+#app-container {
+    padding: 16px;
+}
+
+/* Стили для нижней навигации */
+#bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background-color: var(--tg-theme-secondary-bg-color);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+}
+
+.nav-button {
+    background: none;
+    border: none;
+    color: var(--tg-theme-hint-color);
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.nav-button.active {
+    color: var(--tg-theme-link-color);
+    font-weight: 500;
+}
+
+.nav-button:hover {
+    background-color: var(--card-bg-color);
+}
+
+.search-bar-container {
+    margin-bottom: 20px;
+    position: sticky;
+    top: 0;
+    background-color: var(--tg-theme-bg-color);
+    padding: 10px 0;
+    z-index: 10;
+}
+
+#search-input {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: var(--tg-theme-secondary-bg-color);
+    color: var(--tg-theme-text-color);
+    outline: none;
+}
+
+#search-input:focus {
+    border-color: var(--tg-theme-link-color);
+}
+
+/* frontend/css/styles.css (добавить в конец) */
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+/* Стили для карточки новости в списке */
+.news-card {
+    display: flex;
+    gap: 12px;
+    padding: 10px;
+    background-color: var(--card-bg-color);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.news-card:hover {
+    background-color: rgba(222, 239, 247, 0.15);
+}
+.news-card-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+.news-card-content {
+    display: flex;
+    flex-direction: column;
+}
+.news-card-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+}
+.news-card-date {
+    font-size: 13px;
+    color: var(--tg-theme-hint-color);
+    margin-top: auto; /* Прижимает дату к низу карточки */
+}
+
+.news-detail-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+.news-detail-content {
+    padding: 16px 4px;
+}
+.news-detail-title {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 4px;
+}
+.news-detail-date {
+    font-size: 14px;
+    color: var(--tg-theme-hint-color);
+    margin-bottom: 16px;
+}
+.news-detail-body p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 1em;
+}
+.news-detail-body a {
+    color: var(--tg-theme-link-color);
+    text-decoration: none;
+}
+.news-detail-body h2, .news-detail-body h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+/* --- Стили профиля --- */
+.profile-header {
+    text-align: center;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
+}
+.profile-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    margin-bottom: 12px;
+}
+.profile-username {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+}
+.profile-telegram-id {
+    font-size: 16px;
+    color: var(--tg-theme-hint-color);
+    margin: 4px 0 0;
+}
+.profile-actions {
+    margin-bottom: 20px;
+}
+.action-button {
+    width: 100%;
+    padding: 14px;
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+}
+#favorites-section .section-title {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+
+/* --- Стили модального окна --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(5px);
+}
+.modal-content {
+    background: var(--tg-theme-secondary-bg-color);
+    padding: 20px;
+    border-radius: 14px;
+    width: 90%;
+    max-width: 400px;
+}
+.modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--tg-theme-hint-color);
+    font-size: 14px;
+}
+.form-group input, .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    background: var(--tg-theme-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--tg-theme-text-color);
+    font-size: 16px;
+}
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+.form-actions button {
+    flex-grow: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+}
+.button-primary {
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+}
+.button-secondary {
+    background-color: var(--card-bg-color);
+    color: var(--tg-theme-text-color);
+}
+
+.action-button.secondary {
+    background-color: var(--card-bg-color);
+    color: var(--tg-theme-text-color);
+    margin-top: 10px;
+}
+
+.admin-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.admin-tab-button {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--tg-theme-hint-color);
+    border-radius: 8px;
+    cursor: pointer;
+}
+.admin-tab-button.active {
+    background: var(--card-bg-color);
+    color: var(--tg-theme-text-color);
+    border-color: var(--tg-theme-text-color);
+}
+
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.admin-form h2 {
+    text-align: center;
+}
+.admin-form input, .admin-form textarea, .admin-form button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--tg-theme-secondary-bg-color);
+    color: var(--tg-theme-text-color);
+    font-size: 16px;
+}
+.admin-form textarea {
+    resize: vertical;
+}
+.admin-form button {
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    border: none;
+    cursor: pointer;
+}
+.admin-form button:disabled {
+    background-color: var(--tg-theme-hint-color);
+    cursor: not-allowed;
+}
+
+.submission-card {
+    background: var(--card-bg-color);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+.submission-card h3 {
+    margin-top: 0;
+}
+.submission-card a {
+    color: var(--tg-theme-link-color);
+    word-break: break-all;
+}
+.submission-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.app-detail-page {
+    padding-bottom: 20px;
+}
+.app-detail-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 20px;
+}
+.app-detail-icon {
+    width: 90px;
+    height: 90px;
+    border-radius: 22px;
+    margin-bottom: 12px;
+}
+.app-detail-title {
+    font-size: 24px;
+    font-weight: 700;
+}
+.app-detail-actions {
+    margin-bottom: 24px;
+}
+.app-detail-body .section-title {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+.app-detail-description {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--tg-theme-hint-color);
+    white-space: pre-wrap; /* Сохраняет переносы строк */
+}
+
+/*Кнопка назад появляющаяся если нет нативной кнопки*/
+.fallback-back-button {
+    background: none;
+    border: none;
+    color: var(--tg-theme-link-color);
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 15px;
+    padding: 5px 0;
+}
