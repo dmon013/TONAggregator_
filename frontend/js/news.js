@@ -44,24 +44,30 @@ async function renderNewsListPage(container) {
  * @param {object} newsItem - Данные одной новости
  * @returns {HTMLElement}
  */
+// frontend/js/news.js (возвращаем чистую версию функции createNewsCard)
+
 function createNewsCard(newsItem) {
     const card = document.createElement('div');
     card.className = 'news-card';
     
-    // Форматируем дату в читаемый вид
     const date = new Date(newsItem.created_at).toLocaleDateString('ru-RU', {
         day: 'numeric', month: 'long', year: 'numeric'
     });
+
+    // Создаем HTML для краткого описания, только если оно существует
+    const excerptHtml = newsItem.excerpt 
+        ? `<p class="news-card-excerpt">${newsItem.excerpt}</p>` 
+        : ''; // В противном случае - пустая строка, без ошибки
 
     card.innerHTML = `
         <img src="${newsItem.preview_url}" alt="${newsItem.title}" class="news-card-image">
         <div class="news-card-content">
             <h3 class="news-card-title">${newsItem.title}</h3>
+            ${excerptHtml} 
             <p class="news-card-date">${date}</p>
         </div>
     `;
 
-    // Добавляем обработчик клика для перехода к деталям
     card.addEventListener('click', () => {
         navigateTo('news-detail', { id: newsItem.id });
     });

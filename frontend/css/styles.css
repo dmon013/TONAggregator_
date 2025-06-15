@@ -1,621 +1,171 @@
-/* frontend/css/styles.css */
+/* frontend/css/styles.css (ПОЛНАЯ ВЕРСИЯ С ВЕРТИКАЛЬНЫМИ СПИСКАМИ) */
 
-/* Переменные с цветами из дизайн-гайда Telegram */
+/* ==========================================================================
+   1. БАЗОВЫЕ СТИЛИ И ПЕРЕМЕННЫЕ
+   ========================================================================== */
 :root {
-    --tg-theme-bg-color: var(--tg-bg-color, #222F37);
-    --tg-theme-text-color: var(--tg-text-color, #DEEFF7);
+    --tg-theme-bg-color: var(--tg-bg-color, #17212b);
+    --tg-theme-text-color: var(--tg-text-color, #ffffff);
     --tg-theme-hint-color: var(--tg-hint-color, #b1c3d1);
-    --tg-theme-link-color: var(--tg-link-color, #2AABEE);
-    --tg-theme-button-color: var(--tg-button-color, #2AABEE);
+    --tg-theme-link-color: var(--tg-link-color, #62b1f3);
+    --tg-theme-button-color: var(--tg-button-color, #40a7e3);
     --tg-theme-button-text-color: var(--tg-button-text-color, #ffffff);
-    --tg-theme-secondary-bg-color: var(--tg-secondary-bg-color, #17212b);
-
-    /* Наши кастомные цвета для элементов */
+    --tg-theme-secondary-bg-color: var(--tg-secondary-bg-color, #232e3c);
     --card-bg-color: rgba(222, 239, 247, 0.08);
     --border-color: rgba(222, 239, 247, 0.15);
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
     background-color: var(--tg-theme-bg-color);
     color: var(--tg-theme-text-color);
-    font-family: 'Roboto', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overscroll-behavior: none; /* Убирает "оттягивание" страницы на мобильных */
-    padding-bottom: 70px; /* Оставляем место для нижней навигации */
+    overscroll-behavior-y: none;
+    padding-bottom: 70px;
 }
 
-#app-container {
-    padding: 16px;
-}
+/* ==========================================================================
+   2. ОБЩИЕ КОМПОНЕНТЫ
+   ========================================================================== */
+#app-container { padding: 16px; }
+.page-title { font-size: 24px; font-weight: 700; margin-bottom: 16px; }
+.page-subtitle { font-size: 15px; color: var(--tg-theme-hint-color); margin: -12px 0 20px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.loader { width: 24px; height: 24px; border: 3px solid var(--tg-theme-hint-color); border-bottom-color: transparent; border-radius: 50%; display: block; box-sizing: border-box; animation: rotation 1s linear infinite; margin: 40px auto; }
+.hint-text, .error-text { color: var(--tg-theme-hint-color); text-align: center; padding: 20px; }
+.error-text { color: #E53935; }
+.action-button { width: 100%; padding: 14px; background-color: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); border: none; border-radius: 10px; font-size: 16px; font-weight: 500; cursor: pointer; }
+.action-button.secondary { background-color: var(--card-bg-color); color: var(--tg-theme-text-color); margin-top: 10px; }
 
-/* Стили для нижней навигации */
-#bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    background-color: var(--tg-theme-secondary-bg-color);
-    border-top: 1px solid var(--border-color);
+
+/* ==========================================================================
+   3. НАВИГАЦИЯ
+   ========================================================================== */
+#bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background-color: var(--tg-theme-secondary-bg-color); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+.nav-button { background: none; border: none; color: var(--tg-theme-hint-color); font-size: 14px; font-family: inherit; cursor: pointer; padding: 8px; border-radius: 8px; transition: background-color 0.2s, color 0.2s; }
+.nav-button.active { color: var(--tg-theme-link-color); font-weight: 500; }
+.fallback-back-button { background: none; border: none; color: var(--tg-theme-link-color); font-size: 16px; font-weight: 500; cursor: pointer; margin-bottom: 15px; padding: 5px 0; }
+
+
+/* ==========================================================================
+   4. КОНТЕЙНЕРЫ ДЛЯ КАРТОЧЕК И САМИ КАРТОЧКИ
+   ========================================================================== */
+.collection-title { font-size: 20px; font-weight: 500; margin-bottom: 12px; }
+.app-collection { margin-bottom: 24px; }
+
+/* ЕДИНЫЙ СТИЛЬ ДЛЯ ВСЕХ СПИСКОВ (вертикальная колонка) */
+.cards-container {
     display: flex;
-    justify-content: space-around;
-    align-items: center;
-    z-index: 1000;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.nav-button {
-    background: none;
-    border: none;
-    color: var(--tg-theme-hint-color);
-    font-size: 14px;
-    font-family: inherit;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 8px;
-    transition: background-color 0.2s, color 0.2s;
-}
-
-.nav-button.active {
-    color: var(--tg-theme-link-color);
-    font-weight: 500;
-}
-
-.nav-button:hover {
-    background-color: var(--card-bg-color);
-}
-
-.search-bar-container {
-    margin-bottom: 20px;
-    position: sticky;
-    top: 0;
-    background-color: var(--tg-theme-bg-color);
-    padding: 10px 0;
-    z-index: 10;
-}
-
-#search-input {
-    width: 100%;
-    padding: 12px 16px;
-    font-size: 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    background-color: var(--tg-theme-secondary-bg-color);
-    color: var(--tg-theme-text-color);
-    outline: none;
-}
-
-#search-input:focus {
-    border-color: var(--tg-theme-link-color);
-}
-
-/* frontend/css/styles.css (добавить в конец) */
-
-.page-title {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 16px;
-}
-
-/* Стили для карточки новости в списке */
-.news-card {
-    display: flex;
-    gap: 12px;
-    padding: 10px;
-    background-color: var(--card-bg-color);
+/* Общий стиль для карточки приложения */
+.app-card {
+    background: var(--card-bg-color);
     border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     cursor: pointer;
     transition: background-color 0.2s;
 }
-.news-card:hover {
-    background-color: rgba(222, 239, 247, 0.15);
-}
-.news-card-image {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 10px;
-    flex-shrink: 0;
-}
-.news-card-content {
-    display: flex;
-    flex-direction: column;
-}
-.news-card-title {
-    font-size: 16px;
-    font-weight: 500;
-    margin: 0;
-}
-.news-card-date {
-    font-size: 13px;
-    color: var(--tg-theme-hint-color);
-    margin-top: auto; /* Прижимает дату к низу карточки */
-}
+.app-card:hover { background-color: rgba(222, 239, 247, 0.15); }
+.app-icon { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+.app-info { flex-grow: 1; overflow: hidden; }
+.app-title { font-size: 16px; font-weight: 500; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app-description { font-size: 14px; color: var(--tg-theme-hint-color); margin: 4px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.open-app-button, .add-app-button { background-color: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); border: none; border-radius: 8px; padding: 8px 12px; font-size: 14px; font-weight: 500; cursor: pointer; transition: filter 0.2s; margin-left: auto; flex-shrink: 0; }
+.open-app-button:hover, .add-app-button:hover { filter: brightness(1.1); }
+.add-app-button:disabled, .add-app-button.disabled { background: var(--tg-theme-hint-color); color: var(--tg-theme-secondary-bg-color); cursor: default; filter: none; }
 
-.news-detail-image {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 12px;
-}
-.news-detail-content {
-    padding: 16px 4px;
-}
-.news-detail-title {
-    font-size: 22px;
-    font-weight: 700;
-    line-height: 1.3;
-    margin-bottom: 4px;
-}
-.news-detail-date {
-    font-size: 14px;
-    color: var(--tg-theme-hint-color);
-    margin-bottom: 16px;
-}
-.news-detail-body p {
-    font-size: 16px;
-    line-height: 1.6;
-    margin-bottom: 1em;
-}
-.news-detail-body a {
-    color: var(--tg-theme-link-color);
-    text-decoration: none;
-}
-.news-detail-body h2, .news-detail-body h3 {
-    margin-top: 1.5em;
-    margin-bottom: 0.5em;
-}
-
-/* --- Стили профиля --- */
-.profile-header {
-    text-align: center;
-    padding: 20px 0;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 20px;
-}
-.profile-avatar {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    margin-bottom: 12px;
-}
-.profile-username {
-    font-size: 22px;
-    font-weight: 700;
-    margin: 0;
-}
-.profile-telegram-id {
-    font-size: 16px;
-    color: var(--tg-theme-hint-color);
-    margin: 4px 0 0;
-}
-.profile-actions {
-    margin-bottom: 20px;
-}
-.action-button {
-    width: 100%;
-    padding: 14px;
-    background-color: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-}
-#favorites-section .section-title {
-    font-size: 20px;
-    font-weight: 500;
-    margin-bottom: 12px;
-}
+/* Стили для карточки новостей */
+.news-card { display: flex; gap: 12px; padding: 10px; background-color: var(--card-bg-color); border-radius: 12px; cursor: pointer; transition: background-color 0.2s; }
+.news-card:hover { background-color: rgba(222, 239, 247, 0.15); }
+.news-card-image { width: 80px; height: 80px; object-fit: cover; border-radius: 10px; flex-shrink: 0; }
+.news-card-content { display: flex; flex-direction: column; flex-grow: 1; }
+.news-card-title { font-size: 16px; font-weight: 500; margin: 0; }
+.news-card-excerpt { font-size: 14px; color: var(--tg-theme-hint-color); margin: 4px 0; flex-grow: 1; }
+.news-card-date { font-size: 13px; color: var(--tg-theme-hint-color); margin-top: auto; }
 
 
-/* --- Стили модального окна --- */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-    backdrop-filter: blur(5px);
-}
-.modal-content {
-    background: var(--tg-theme-secondary-bg-color);
-    padding: 20px;
-    border-radius: 14px;
-    width: 90%;
-    max-width: 400px;
-}
-.modal-content h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    text-align: center;
-}
-.form-group {
-    margin-bottom: 15px;
-}
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    color: var(--tg-theme-hint-color);
-    font-size: 14px;
-}
-.form-group input, .form-group textarea {
-    width: 100%;
-    padding: 10px;
-    background: var(--tg-theme-bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    color: var(--tg-theme-text-color);
-    font-size: 16px;
-}
-.form-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-}
-.form-actions button {
-    flex-grow: 1;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-}
-.button-primary {
-    background-color: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
-}
-.button-secondary {
-    background-color: var(--card-bg-color);
-    color: var(--tg-theme-text-color);
-}
+/* ==========================================================================
+   5. СТРАНИЦЫ (Мои TApps, Детали, Профиль, Админка)
+   ========================================================================== */
 
-.action-button.secondary {
-    background-color: var(--card-bg-color);
-    color: var(--tg-theme-text-color);
-    margin-top: 10px;
-}
+/* --- Мои TApps --- */
+.my-apps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.grid-slot { width: 100%; padding-top: 100%; position: relative; background: rgba(222, 239, 247, 0.1); border-radius: 16px; cursor: pointer; transition: transform 0.2s, background-color 0.2s; animation: fadeIn 0.5s ease-out; }
+.grid-slot:hover { transform: scale(1.05); }
+.grid-slot .plus-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 36px; color: var(--tg-theme-hint-color); font-weight: 200; line-height: 1; }
+.grid-slot.filled { background: rgba(222, 239, 247, 0.3); }
+.grid-slot .slot-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 48px; height: 48px; border-radius: 10px; }
+.edit-button { background: none; border: none; color: var(--tg-theme-link-color); font-size: 16px; cursor: pointer; padding: 8px; }
+.edit-button.active { font-weight: bold; }
+.delete-slot-button { position: absolute; top: -8px; right: -8px; background: #E53935; color: white; border: 2px solid var(--tg-theme-bg-color); border-radius: 50%; width: 24px; height: 24px; font-size: 18px; line-height: 22px; text-align: center; cursor: pointer; opacity: 0; transform: scale(0.5); transition: all 0.2s ease-out; z-index: 10; }
+.my-apps-grid.edit-mode .delete-slot-button { opacity: 1; transform: scale(1); }
+.my-apps-grid.edit-mode .grid-slot.filled { animation: jiggle 0.3s infinite; }
 
-.admin-tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-.admin-tab-button {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    background: transparent;
-    color: var(--tg-theme-hint-color);
-    border-radius: 8px;
-    cursor: pointer;
-}
-.admin-tab-button.active {
-    background: var(--card-bg-color);
-    color: var(--tg-theme-text-color);
-    border-color: var(--tg-theme-text-color);
-}
+/* --- Поиск --- */
+.search-bar-container { margin-bottom: 20px; position: sticky; top: 0; background-color: var(--tg-theme-bg-color); padding: 10px 0; z-index: 10; }
+#search-input { width: 100%; padding: 12px 16px; font-size: 16px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--tg-theme-secondary-bg-color); color: var(--tg-theme-text-color); outline: none; }
+#search-input:focus { border-color: var(--tg-theme-link-color); }
 
-.admin-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-.admin-form h2 {
-    text-align: center;
-}
-.admin-form input, .admin-form textarea, .admin-form button {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background: var(--tg-theme-secondary-bg-color);
-    color: var(--tg-theme-text-color);
-    font-size: 16px;
-}
-.admin-form textarea {
-    resize: vertical;
-}
-.admin-form button {
-    background-color: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
-    border: none;
-    cursor: pointer;
-}
-.admin-form button:disabled {
-    background-color: var(--tg-theme-hint-color);
-    cursor: not-allowed;
-}
+/* --- Страницы деталей --- */
+.app-detail-page, .news-detail-page { padding-bottom: 20px; }
+.app-detail-header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px; }
+.app-detail-icon { width: 90px; height: 90px; border-radius: 22px; margin-bottom: 12px; }
+.app-detail-title { font-size: 24px; font-weight: 700; }
+.app-detail-actions { margin-bottom: 24px; }
+.app-detail-body .section-title, #admin-collection-controls h3 { font-size: 20px; font-weight: 500; margin-bottom: 8px; }
+.app-detail-description { font-size: 16px; line-height: 1.6; color: var(--tg-theme-hint-color); white-space: pre-wrap; }
+#admin-collection-controls { border-top: 1px solid var(--border-color); padding-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+#admin-collection-controls h3 { text-align: center; color: var(--tg-theme-hint-color); }
+.news-detail-image { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; }
+.news-detail-content { padding: 16px 4px; }
+.news-detail-title { font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 4px; }
+.news-detail-date { font-size: 14px; color: var(--tg-theme-hint-color); margin-bottom: 16px; }
+.news-detail-body p { font-size: 16px; line-height: 1.6; margin-bottom: 1em; }
+.news-detail-body a { color: var(--tg-theme-link-color); text-decoration: none; }
 
-.submission-card {
-    background: var(--card-bg-color);
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 10px;
-}
-.submission-card h3 {
-    margin-top: 0;
-}
-.submission-card a {
-    color: var(--tg-theme-link-color);
-    word-break: break-all;
-}
-.submission-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
+/* --- Профиль --- */
+.profile-header { text-align: center; padding: 20px 0; border-bottom: 1px solid var(--border-color); }
+.profile-avatar { width: 90px; height: 90px; border-radius: 50%; margin-bottom: 12px; }
+.profile-username { font-size: 22px; font-weight: 700; margin: 0; }
+.profile-telegram-id { font-size: 16px; color: var(--tg-theme-hint-color); margin: 4px 0 0; }
 
-.app-detail-page {
-    padding-bottom: 20px;
-}
-.app-detail-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    margin-bottom: 20px;
-}
-.app-detail-icon {
-    width: 90px;
-    height: 90px;
-    border-radius: 22px;
-    margin-bottom: 12px;
-}
-.app-detail-title {
-    font-size: 24px;
-    font-weight: 700;
-}
-.app-detail-actions {
-    margin-bottom: 24px;
-}
-.app-detail-body .section-title {
-    font-size: 20px;
-    font-weight: 500;
-    margin-bottom: 8px;
-}
-.app-detail-description {
-    font-size: 16px;
-    line-height: 1.6;
-    color: var(--tg-theme-hint-color);
-    white-space: pre-wrap; /* Сохраняет переносы строк */
-}
+/* --- Модальное окно --- */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px); }
+.modal-content { background: var(--tg-theme-secondary-bg-color); padding: 20px; border-radius: 14px; width: 90%; max-width: 400px; }
+.modal-content h2 { margin-top: 0; margin-bottom: 20px; text-align: center; }
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; margin-bottom: 5px; color: var(--tg-theme-hint-color); font-size: 14px; }
+.form-group input, .form-group textarea { width: 100%; padding: 10px; background: var(--tg-theme-bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--tg-theme-text-color); font-size: 16px; }
+.form-actions { display: flex; gap: 10px; margin-top: 20px; }
+.form-actions button { flex-grow: 1; padding: 12px; border-radius: 8px; border: none; font-size: 16px; font-weight: 500; cursor: pointer; }
+.button-primary { background-color: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); }
+.button-secondary { background-color: var(--card-bg-color); color: var(--tg-theme-text-color); }
 
-/*Кнопка назад появляющаяся если нет нативной кнопки*/
-.fallback-back-button {
-    background: none;
-    border: none;
-    color: var(--tg-theme-link-color);
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-    margin-bottom: 15px;
-    padding: 5px 0;
-}
+/* --- Админ-панель --- */
+.admin-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+.admin-tab-button { flex-grow: 1; padding: 10px; border: 1px solid var(--border-color); background: transparent; color: var(--tg-theme-hint-color); border-radius: 8px; cursor: pointer; }
+.admin-tab-button.active { background: var(--card-bg-color); color: var(--tg-theme-text-color); border-color: var(--tg-theme-text-color); }
+.admin-form { display: flex; flex-direction: column; gap: 15px; }
+.admin-form h2 { text-align: center; }
+.admin-form textarea { resize: vertical; }
+.admin-form button:disabled { background-color: var(--tg-theme-hint-color); cursor: not-allowed; }
+.submission-card { background: var(--card-bg-color); border-radius: 12px; padding: 15px; margin-bottom: 10px; }
+.submission-card h3 { margin-top: 0; }
+.submission-card a { color: var(--tg-theme-link-color); word-break: break-all; }
+.submission-actions { display: flex; gap: 10px; margin-top: 10px; }
 
-/* Стили для вкладки "MyApp" */
-.page-subtitle {
-    font-size: 15px;
-    color: var(--tg-theme-hint-color);
-    margin: -12px 0 20px;
-}
-.my-apps-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-}
-.grid-slot {
-    width: 100%;
-    padding-top: 100%; /* Создает квадратное соотношение сторон */
-    position: relative;
-    background: rgba(222, 239, 247, 0.1);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
-    animation: fadeIn 0.5s ease-out;
-}
-.grid-slot:hover {
-    transform: scale(1.05);
-    background: rgba(222, 239, 247, 0.2);
-}
-.grid-slot .plus-icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 36px;
-    color: var(--tg-theme-hint-color);
-    font-weight: 200;
-}
-.grid-slot.filled {
-    background: rgba(222, 239, 247, 0.3);
-}
-.grid-slot .slot-icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-}
-.add-app-button {
-    background-color: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
-    border: none;
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: filter 0.2s;
-}
-.add-app-button:hover {
-    filter: brightness(1.1);
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* frontend/css/styles.css (добавить в конец) */
-
-/* Стили для страницы "Мои TApps" */
-.page-subtitle {
-    font-size: 15px;
-    color: var(--tg-theme-hint-color);
-    margin-top: -12px;
-    margin-bottom: 20px;
-}
-
-.my-apps-grid {
-    display: grid;
-    /* Создаем 4 колонки одинаковой ширины */
-    grid-template-columns: repeat(4, 1fr);
-    /* Задаем отступ между ячейками */
-    gap: 12px;
-}
-
-.grid-slot {
-    width: 100%;
-    /* Этот трюк с padding-top создает идеальные квадраты */
-    padding-top: 100%; 
-    position: relative;
-    background: rgba(222, 239, 247, 0.1);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
-    /* Анимация плавного появления */
-    animation: fadeIn 0.5s ease-out;
-}
-
-.grid-slot:hover {
-    transform: scale(1.05);
-    background: rgba(222, 239, 247, 0.2);
-}
-
-.grid-slot .plus-icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 36px;
-    color: var(--tg-theme-hint-color);
-    font-weight: 200;
-    line-height: 1;
-}
-
-.grid-slot.filled {
-    background: rgba(222, 239, 247, 0.3);
-}
-
-.grid-slot .slot-icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-}
-
-/* Стили для кнопки "Добавить" в поиске */
-.add-app-button {
-    background-color: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
-    border: none;
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: filter 0.2s;
-    margin-left: auto; /* Прижимает кнопку к правому краю */
-}
-
-.add-app-button:hover {
-    filter: brightness(1.1);
-}
-.add-app-button:disabled {
-    background-color: var(--tg-theme-hint-color);
-    cursor: default;
-    filter: none;
-}
-
-
-/* Анимация появления */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 4px;
-}
-.edit-button {
-    background: none;
-    border: none;
-    color: var(--tg-theme-link-color);
-    font-size: 16px;
-    cursor: pointer;
-    padding: 8px;
-}
-.edit-button.active {
-    font-weight: bold;
-}
-
-.delete-slot-button {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: #E53935; /* Красный */
-    color: white;
-    border: 2px solid var(--tg-theme-bg-color);
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    font-size: 18px;
-    line-height: 22px;
-    text-align: center;
-    cursor: pointer;
-    opacity: 0; /* Скрыт по умолчанию */
-    transform: scale(0.5);
-    transition: all 0.2s ease-out;
-    z-index: 10;
-}
-/* Показываем крестик в режиме редактирования */
-.my-apps-grid.edit-mode .delete-slot-button {
-    opacity: 1;
-    transform: scale(1);
-}
-/* Анимация покачивания в режиме редактирования */
-.my-apps-grid.edit-mode .grid-slot.filled {
-    animation: jiggle 0.3s infinite;
-}
-@keyframes jiggle {
-    0% { transform: rotate(-1deg); }
-    50% { transform: rotate(1deg); }
-    100% { transform: rotate(-1deg); }
-}
-.add-app-button.disabled {
-    background: var(--tg-theme-hint-color);
-    color: var(--tg-theme-secondary-bg-color);
-    cursor: default;
-}
+/* ==========================================================================
+   АНИМАЦИИ
+   ========================================================================== */
+@keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes jiggle { 0% { transform: rotate(-1deg); } 50% { transform: rotate(1deg); } 100% { transform: rotate(-1deg); } }

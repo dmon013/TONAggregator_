@@ -1,65 +1,75 @@
-// frontend/js/home.js
+// frontend/js/home.js (ПОЛНАЯ НОВАЯ ДИНАМИЧЕСКАЯ ВЕРСИЯ)
 
-// Укажи здесь URL своего бэкенда
-const API_BASE_URL = 'http://127.0.0.1:5001';
+// API_BASE_URL остается без изменений
 
 /**
- * Главная функция для отрисовки домашней страницы
+ * Главная функция для отрисовки домашней страницы.
+ * Теперь она сама загружает список всех подборок и рендерит их.
  * @param {HTMLElement} container - Элемент, в который будет рендериться контент
  */
-function renderHomePage(container) {
+async function renderHomePage(container) {
     container.innerHTML = `
-        <div class="page-content">
-            <section id="trending-section" class="app-collection"></section>
-            <section id="new-section" class="app-collection"></section>
-            <section id="top3-section" class="app-collection"></section>
+        <div class="page-content" id="home-page-content">
+            <div class="loader"></div>
         </div>
     `;
+    const homeContent = document.getElementById('home-page-content');
 
-    // Загружаем и отрисовываем каждую коллекцию
-    renderCollection(
-        document.getElementById('trending-section'),
-        'trending',
-        '🔥 В тренде'
-    );
-    renderCollection(
-        document.getElementById('new-section'),
-        'new',
-        '✨ Новое'
-    );
-    renderCollection(
-        document.getElementById('top3-section'),
-        'top3',
-        '🏆 Топ 3'
-    );
+    try {
+        // Загружаем список всех существующих подборок
+        const response = await fetch(`${API_BASE_URL}/api/collections`);
+        if (!response.ok) throw new Error('Не удалось загрузить подборки');
+        
+        const collections = await response.json();
+
+        homeContent.innerHTML = ''; // Убираем лоадер
+
+        // Для каждой подборки создаем свою секцию и запускаем загрузку приложений
+        collections.forEach(collection => {
+            // Важное условие: не показываем подборку, если у нее нет поля 'apps' или оно пустое
+            if (collection.apps && collection.apps.length > 0) {
+                const sectionElement = document.createElement('section');
+                sectionElement.id = `collection-${collection.id}`;
+                sectionElement.className = 'app-collection';
+                homeContent.appendChild(sectionElement);
+                
+                // Вызываем нашу старую добрую функцию для отрисовки контента этой секции
+                renderCollectionContent(sectionElement, collection.id, collection.name);
+            }
+        });
+
+    } catch (error) {
+        console.error('Failed to render home page:', error);
+        homeContent.innerHTML = '<p class="error-text">Не удалось загрузить главную страницу.</p>';
+    }
 }
 
 /**
- * Загружает и отрисовывает одну коллекцию приложений
+ * Загружает и отрисовывает ПРИЛОЖЕНИЯ для ОДНОЙ конкретной подборки
  * @param {HTMLElement} sectionElement - Секция для отрисовки
- * @param {string} collectionType - Тип коллекции (trending, new, top3)
- * @param {string} title - Заголовок секции
+ * @param {string} collectionId - ID подборки (trending, new, summer_hits)
+ * @param {string} title - Заголовок секции (🔥 В тренде, ✨ Новое, ☀️ Летние Хиты)
  */
-async function renderCollection(sectionElement, collectionType, title) {
+async function renderCollectionContent(sectionElement, collectionId, title) {
     sectionElement.innerHTML = `
         <h2 class="collection-title">${title}</h2>
-        <div class="cards-container">
+            <div class="cards-container">
             <div class="loader"></div>
         </div>
     `;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/collections/${collectionType}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        // ИЗМЕНЕНИЕ ЗДЕСЬ: Обращаемся к новому маршруту /collection-apps/
+        const response = await fetch(`${API_BASE_URL}/api/collection-apps/${collectionId}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
         const apps = await response.json();
         
         const cardsContainer = sectionElement.querySelector('.cards-container');
-        cardsContainer.innerHTML = ''; // Очищаем лоадер
+        cardsContainer.innerHTML = '';
 
         if (apps.length === 0) {
-            cardsContainer.innerHTML = '<p class="hint-text">Здесь пока пусто.</p>';
+            sectionElement.style.display = 'none';
             return;
         }
 
@@ -69,100 +79,10 @@ async function renderCollection(sectionElement, collectionType, title) {
         });
 
     } catch (error) {
-        console.error(`Failed to load collection ${collectionType}:`, error);
-        const cardsContainer = sectionElement.querySelector('.cards-container');
-        cardsContainer.innerHTML = '<p class="error-text">Не удалось загрузить приложения. Попробуйте позже.</p>';
+        console.error(`Failed to load collection ${collectionId}:`, error);
+        sectionElement.innerHTML = `<h2 class="collection-title">${title}</h2><p class="error-text">Не удалось загрузить приложения.</p>`;
     }
 }
 
-// --- Стили для новых элементов (добавь в styles.css или оставь здесь в <style>) ---
-// Для удобства можно добавить этот блок в твой основной CSS файл.
-const homePageStyles = `
-.collection-title {
-    font-size: 20px;
-    font-weight: 500;
-    margin-bottom: 12px;
-}
-.app-collection {
-    margin-bottom: 24px;
-}
-.cards-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.app-card {
-    background: var(--card-bg-color, rgba(222, 239, 247, 0.08));
-    border-radius: 12px;
-    padding: 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.app-card:hover {
-    background-color: rgba(222, 239, 247, 0.15);
-}
-.app-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-    object-fit: cover;
-}
-.app-info {
-    flex-grow: 1;
-}
-.app-title {
-    font-size: 16px;
-    font-weight: 500;
-    margin: 0;
-}
-.app-description {
-    font-size: 14px;
-    color: var(--tg-theme-hint-color);
-    margin: 4px 0 0;
-}
-.open-app-button {
-    background-color: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
-    border: none;
-    border-radius: 8px;
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: filter 0.2s;
-}
-.open-app-button:hover {
-    filter: brightness(1.1);
-}
-.loader {
-    width: 24px;
-    height: 24px;
-    border: 3px solid var(--tg-theme-hint-color);
-    border-bottom-color: transparent;
-    border-radius: 50%;
-    display: inline-block;
-    box-sizing: border-box;
-    animation: rotation 1s linear infinite;
-    margin: 20px auto;
-}
-.hint-text, .error-text {
-    color: var(--tg-theme-hint-color);
-    text-align: center;
-    padding: 20px;
-}
-
-@keyframes rotation {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-`;
-
-// Добавляем стили на страницу (лучше перенести в css/styles.css)
-document.head.appendChild(document.createElement('style')).innerHTML = homePageStyles;
-
-
-// Регистрируем функцию отрисовки в нашем роутере
+// Регистрируем маршрут в роутере
 routes.home = renderHomePage;
