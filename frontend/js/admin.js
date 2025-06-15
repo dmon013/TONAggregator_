@@ -83,6 +83,10 @@ function renderAddAppForm(container) {
             <textarea name="short_description" placeholder="Краткое описание (для карточек)" rows="3" required></textarea>
             <textarea name="long_description" placeholder="Полное описание (для страницы приложения)" rows="6" required></textarea>
             <input type="text" name="category_id" placeholder="ID Категории (например, games)" required>
+            <label>Ссылки на скриншоты (необязательно):</label>
+            <input type="url" name="screenshot_1" placeholder="URL скриншота 1">
+            <input type="url" name="screenshot_2" placeholder="URL скриншота 2">
+            <input type="url" name="screenshot_3" placeholder="URL скриншота 3">
             <label for="icon-file">Иконка приложения (PNG/JPG):</label>
             <input type="file" name="icon" id="icon-file" accept="image/png, image/jpeg" required>
             <button type="submit">Добавить приложение</button>

@@ -6,6 +6,8 @@ import hashlib
 from urllib.parse import unquote, parse_qsl
 from functools import wraps
 from flask import request, jsonify, g
+import json
+from firebase_service import db
 
 # вот эти две штуки снизу нужны или нет?
 from functools import wraps
@@ -55,6 +57,27 @@ def auth_required(f):
     """Декоратор для защиты маршрутов, требующих аутентификации."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # --- НАЧАЛО НОВОЙ ЛОГИКИ: РЕЖИМ ОТЛАДКИ ---
+        debug_user_id = request.headers.get('X-Debug-User-ID')
+        if debug_user_id:
+            print(f"⚠️ РАБОТА В РЕЖИМЕ ОТЛАДКИ! Пользователь: {debug_user_id}")
+            user_doc = db.collection('users').document(debug_user_id).get()
+            if user_doc.exists:
+                # Имитируем структуру user_data для совместимости
+                user_data_dict = user_doc.to_dict()
+                g.user_data = {
+                    'user': json.dumps({
+                        'id': user_data_dict.get('telegram_id'),
+                        'username': user_data_dict.get('username'),
+                        'photo_url': user_data_dict.get('photo_url')
+                    })
+                }
+                return f(*args, **kwargs)
+            else:
+                return jsonify({"error": f"Debug user with ID {debug_user_id} not found in database"}), 404
+        # --- КОНЕЦ НОВОЙ ЛОГИКИ ---
+
+        # Если отладочного заголовка нет, работает стандартная логика
         init_data = request.headers.get('X-Telegram-Init-Data')
         
         if not init_data:
@@ -65,8 +88,6 @@ def auth_required(f):
         if not is_valid:
             return jsonify({"error": "Invalid initData."}), 403
 
-        # Сохраняем данные пользователя в глобальном контексте запроса (g)
-        # Это позволяет получить к ним доступ внутри защищенной функции
         g.user_data = user_data
         
         return f(*args, **kwargs)

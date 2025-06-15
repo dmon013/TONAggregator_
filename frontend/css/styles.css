@@ -169,3 +169,105 @@ body {
 @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes jiggle { 0% { transform: rotate(-1deg); } 50% { transform: rotate(1deg); } 100% { transform: rotate(-1deg); } }
+
+/* Переработанная карточка приложения */
+
+.app-detail-header-new {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+.app-detail-icon-new {
+    width: 90px;
+    height: 90px;
+    border-radius: 22px;
+    flex-shrink: 0;
+}
+.app-detail-header-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.app-detail-title {
+    font-size: 20px;
+}
+.app-detail-short-description {
+    font-size: 15px;
+    color: var(--tg-theme-hint-color);
+    margin: 4px 0 12px;
+}
+.app-detail-header-buttons {
+    display: flex;
+    gap: 8px;
+}
+.action-button-small {
+    padding: 8px 24px;
+    font-size: 15px;
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+}
+.action-button-icon {
+    padding: 8px 12px;
+    font-size: 15px;
+    background-color: var(--card-bg-color);
+    color: var(--tg-theme-text-color);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.app-detail-section {
+    margin-top: 24px;
+}
+
+.screenshots-container {
+    /* Используем наш трюк для горизонтальной прокрутки */
+    display: flex;
+    flex-direction: row; 
+    overflow-x: auto;
+    gap: 8px;
+    margin: 0 -16px;
+    padding: 4px 16px 12px 16px;
+    scroll-padding: 16px; 
+    scroll-snap-type: x mandatory;
+}
+.screenshots-container::-webkit-scrollbar { display: none; }
+.screenshots-container { -ms-overflow-style: none; scrollbar-width: none; }
+
+.screenshot-image {
+    height: 240px;
+    border-radius: 8px;
+    scroll-snap-align: start;
+}
+
+/* --- Улучшенные стили для админ-формы --- */
+.admin-form label {
+    font-size: 14px;
+    color: var(--tg-theme-hint-color);
+    margin-top: 5px;
+    margin-bottom: -5px;
+}
+
+.admin-form input[type="text"],
+.admin-form input[type="url"],
+.admin-form textarea {
+    background-color: var(--tg-theme-secondary-bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--tg-theme-text-color);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 16px;
+    width: 100%;
+}
+
+.admin-form input[type="text"]:focus,
+.admin-form input[type="url"]:focus,
+.admin-form textarea:focus {
+    outline: none;
+    border-color: var(--tg-theme-link-color);
+}
+

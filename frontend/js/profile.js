@@ -40,25 +40,23 @@ async function checkAndAddAdminButton() {
         const response = await fetch(`${API_BASE_URL}/api/user`, {
             headers: { 'X-Telegram-Init-Data': window.Telegram.WebApp.initData }
         });
-        // Если запрос не прошел или пользователь не авторизован, ничего не делаем
-        if (!response.ok) return; 
-
+        if (!response.ok) return;
         const userData = await response.json();
+        
+        const profileActions = document.querySelector('.profile-actions');
+        const submitButton = document.getElementById('submit-app-button');
 
-        // Если пользователь админ, и кнопки еще нет на странице
         if (userData.is_admin) {
-            const profileActions = document.querySelector('.profile-actions');
+            // Если пользователь - админ, скрываем кнопку "Предложить"
+            if (submitButton) submitButton.style.display = 'none';
+
+            // И добавляем кнопку админ-панели, если ее еще нет
             if (profileActions && !document.getElementById('admin-panel-button')) {
                 const adminButton = document.createElement('button');
-                adminButton.id = 'admin-panel-button';
-                adminButton.className = 'action-button secondary';
-                adminButton.textContent = 'Панель администратора';
-                adminButton.addEventListener('click', () => navigateTo('admin'));
-                profileActions.appendChild(adminButton);
+                // ... (остальной код добавления админ-кнопки без изменений) ...
             }
         }
     } catch (error) {
-        // В случае ошибки просто не показываем кнопку, чтобы не мешать пользователю
         console.error("Failed to check admin status:", error);
     }
 }

@@ -31,12 +31,21 @@ def add_app():
         icon_url = upload_image_to_storage(icon_file, 'app_icons/')
         app_id = str(uuid.uuid4())
         
+        screenshots = [
+            request.form.get('screenshot_1', '').strip(),
+            request.form.get('screenshot_2', '').strip(),
+            request.form.get('screenshot_3', '').strip(),
+        ]
+        # Убираем пустые строки, если не все поля были заполнены
+        screenshots = [url for url in screenshots if url]
+
         new_app_data = {
             "id": app_id,
             "title": title,
             "title_lowercase": title.lower() if title else "",
             "short_description": short_description,
             "long_description": long_description,
+            "screenshots": screenshots, # <--- ДОБАВЛЕНО
             "app_url": app_url,
             "category_id": category_id,
             "icon_url": icon_url,

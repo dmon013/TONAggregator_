@@ -12,6 +12,7 @@ class App:
     icon_url: str
     app_url: str
     category_id: str
+    screenshots: List[str] = field(default_factory=list) # <--- НОВОЕ ПОЛЕ ДЛЯ СКРИНШОТОВ
     collection_ids: List[str] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.utcnow)
     is_approved: bool = False
