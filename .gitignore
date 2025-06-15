@@ -48,3 +48,6 @@ Thumbs.db
 .vscode/
 # Настройки PyCharm и других IDE от JetBrains
 .idea/
+
+
+frontend/js/config.js
