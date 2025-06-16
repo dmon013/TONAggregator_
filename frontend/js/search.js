@@ -1,4 +1,5 @@
-console.log("ЗАГРУЖЕН ФАЙЛ search.js ВЕРСИЯ 2.0 - с проверкой на дубликаты");
+// frontend/js/search.js (ПОЛНАЯ ИТОГОВАЯ ВЕРСИЯ)
+
 function debounce(func, delay) {
     let timeout;
     return function(...args) {
@@ -7,13 +8,23 @@ function debounce(func, delay) {
     };
 }
 
-// Делаем функцию асинхронной, чтобы дождаться загрузки текущих приложений
 async function renderSearchPage(container, params = {}) {
     const addMode = params.addMode || false;
-    const slotIndex = params.slotIndex;
-    
-    const title = addMode ? `Выбор приложения для ячейки #${slotIndex + 1}` : "Поиск";
-    const placeholder = addMode ? "Найти приложение для добавления..." : "Найти приложение...";
+
+    let title = "Поиск";
+    let placeholder = "Найти приложение...";
+
+    if (addMode) {
+        if (params.addTarget === 'collection') {
+            title = `Добавление в "${params.collectionName || ''}"`;
+            placeholder = `Найти приложение для "${params.collectionName || ''}"...`;
+        } else { // addTarget === 'my-apps'
+            const slotIndex = params.slotIndex;
+            title = `Выбор для ячейки #${slotIndex !== undefined ? slotIndex + 1 : '?'}`;
+            placeholder = "Найти приложение для добавления...";
+        }
+        setupBackButton(container);
+    }
 
     container.innerHTML = `
         <div class="search-page">
@@ -28,27 +39,24 @@ async function renderSearchPage(container, params = {}) {
     const searchInput = document.getElementById('search-input');
     const resultsContainer = document.getElementById('search-results-container');
     
-    let currentUserAppIds = []; // Переменная для хранения ID текущих приложений
-    if (addMode) {
-        setupBackButton(container);
+    let currentUserAppIds = [];
+    if (addMode && params.addTarget === 'my-apps') {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/myapps`, {
-                headers: { 'X-Telegram-Init-Data': window.Telegram.WebApp.initData }
-            });
-            const currentUserApps = await response.json();
-            // Превращаем объект с приложениями в простой массив их ID
-            currentUserAppIds = Object.values(currentUserApps).map(app => app.id);
+            const response = await fetch(`${API_BASE_URL}/api/myapps`, { headers: { 'X-Telegram-Init-Data': window.Telegram.WebApp.initData } });
+            if (response.ok) {
+                const currentUserApps = await response.json();
+                currentUserAppIds = Object.values(currentUserApps).map(app => app.id);
+            }
         } catch (e) { console.error("Could not fetch current user apps"); }
     }
 
     searchInput.addEventListener('input', debounce((event) => {
-        // Передаем массив ID в функцию поиска
-        performSearch(event.target.value, resultsContainer, addMode, slotIndex, currentUserAppIds);
+        performSearch(event.target.value, resultsContainer, params, currentUserAppIds);
     }, 300));
 }
 
-// Добавляем currentUserAppIds в параметры функции
-async function performSearch(query, resultsContainer, addMode, slotIndex, currentUserAppIds = []) {
+async function performSearch(query, resultsContainer, params, currentUserAppIds = []) {
+    const addMode = params.addMode || false;
     query = query.trim().toLowerCase();
 
     if (query.length < 2) {
@@ -71,9 +79,8 @@ async function performSearch(query, resultsContainer, addMode, slotIndex, curren
         }
 
         results.forEach(app => {
-            // Передаем массив ID дальше в функцию создания карточки
             const appCard = addMode 
-                ? createAppCardForAddMode(app, slotIndex, currentUserAppIds) 
+                ? createAppCardForAddMode(app, params, currentUserAppIds) 
                 : createAppCard(app);
             resultsContainer.appendChild(appCard);
         });
@@ -84,13 +91,11 @@ async function performSearch(query, resultsContainer, addMode, slotIndex, curren
     }
 }
 
-// Добавляем currentUserAppIds в параметры и используем его
-function createAppCardForAddMode(app, slotIndex, currentUserAppIds) {
+function createAppCardForAddMode(app, params, currentUserAppIds) {
     const card = document.createElement('div');
     card.className = 'app-card';
 
-    // Проверяем, есть ли ID текущего приложения в списке уже добавленных
-    const isAlreadyAdded = currentUserAppIds.includes(app.id);
+    const isAlreadyAdded = params.addTarget === 'my-apps' && currentUserAppIds.includes(app.id);
 
     card.innerHTML = `
         <img src="${app.icon_url}" alt="${app.title}" class="app-icon">
@@ -103,7 +108,6 @@ function createAppCardForAddMode(app, slotIndex, currentUserAppIds) {
 
     const addButton = card.querySelector('.add-app-button');
     
-    // Если приложение уже добавлено, делаем кнопку неактивной
     if (isAlreadyAdded) {
         addButton.disabled = true;
         addButton.textContent = 'Добавлено';
@@ -113,23 +117,37 @@ function createAppCardForAddMode(app, slotIndex, currentUserAppIds) {
             e.stopPropagation();
             const tg = window.Telegram.WebApp;
             
+            let apiUrl = '';
+            let body = {};
+            let successRedirectRoute = 'home';
+
+            if (params.addTarget === 'collection') {
+                apiUrl = `${API_BASE_URL}/admin/collections/manage`;
+                body = { collection_id: params.collectionId, app_id: app.id, action: 'add' };
+            } else { // 'my-apps'
+                apiUrl = `${API_BASE_URL}/api/myapps/update`;
+                body = { slotIndex: params.slotIndex, app_id: app.id };
+                successRedirectRoute = 'myapps';
+            }
+
             addButton.disabled = true;
             addButton.textContent = '...';
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/myapps/update`, {
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tg.initData },
-                    body: JSON.stringify({ slotIndex, app_id: app.id })
+                    body: JSON.stringify(body)
                 });
-                if (!response.ok) throw new Error('Не удалось добавить');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Не удалось добавить');
+                }
                 
                 tg.HapticFeedback.notificationOccurred('success');
-                navigateTo('myapps');
+                navigateTo(successRedirectRoute);
             } catch (error) {
-                // Если бэкенд вернул ошибку (например, 409), покажем ее
-                const errorData = await error.response?.json();
-                tg.showAlert(errorData?.error || 'Ошибка при добавлении.');
+                tg.showAlert(`Ошибка: ${error.message}`);
                 addButton.disabled = false;
                 addButton.textContent = 'Добавить';
             }
@@ -137,6 +155,5 @@ function createAppCardForAddMode(app, slotIndex, currentUserAppIds) {
     }
     return card;
 }
-
 
 routes.search = renderSearchPage;

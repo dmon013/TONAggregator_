@@ -203,3 +203,32 @@ def create_collection():
         return jsonify(new_collection_data), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    # backend/routes/api_admin.py (добавить в конец файла)
+
+@api_admin_bp.route('/news/<string:news_id>', methods=['DELETE'])
+@admin_required
+def delete_news(news_id):
+    """Удаление новости администратором."""
+    try:
+        news_ref = db.collection('news').document(news_id)
+        if not news_ref.get().exists:
+            return jsonify({"error": "News not found"}), 404
+        
+        news_ref.delete()
+        return jsonify({"status": "success", "message": f"News {news_id} deleted."}), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@api_admin_bp.route('/collections/<string:collection_id>', methods=['DELETE'])
+@admin_required
+def delete_collection(collection_id):
+    """Удаление подборки администратором."""
+    try:
+        # Просто удаляем документ подборки. Приложения в ней останутся,
+        # но сама подборка перестанет существовать.
+        db.collection('collections').document(collection_id).delete()
+        return jsonify({"status": "success", "message": f"Collection {collection_id} deleted."}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

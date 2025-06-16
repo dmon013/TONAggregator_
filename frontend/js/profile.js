@@ -4,28 +4,26 @@
  */
 function renderProfilePage(container) {
     const tg = window.Telegram.WebApp;
-    // Данные пользователя берем напрямую из Telegram для мгновенного отображения
     const user = tg.initDataUnsafe.user;
 
-    // Формируем базовый HTML страницы без списка избранного
+    const displayName = [user?.first_name, user?.last_name].filter(Boolean).join(' ');
+
     container.innerHTML = `
         <div class="profile-page">
             <div class="profile-header">
-                <img src="${user?.photo_url || 'assets/default-avatar.png'}" alt="Avatar" class="profile-avatar" onerror="this.src='assets/default-avatar.png';">
-                <h1 class="profile-username">${user?.first_name || 'User'} ${user?.last_name || ''}</h1>
+                <img src="${user?.photo_url || ''}" alt="Avatar" class="profile-avatar" onerror="this.onerror=null;this.src='assets/default-avatar.png';">
+                <h1 class="profile-username">${displayName || 'User'}</h1>
                 <p class="profile-telegram-id">@${user?.username || 'username'}</p>
             </div>
-
             <div class="profile-actions">
                 <button id="submit-app-button" class="action-button">Предложить приложение</button>
-                </div>
+            </div>
         </div>
     `;
     
-    // Вызываем отдельную функцию для проверки статуса администратора
+    // Вызываем проверку на админа
     checkAndAddAdminButton();
 
-    // Навешиваем событие на кнопку предложения приложения
     document.getElementById('submit-app-button').addEventListener('click', () => {
         showSubmissionModal();
     });
@@ -37,23 +35,30 @@ function renderProfilePage(container) {
  */
 async function checkAndAddAdminButton() {
     try {
+        // Делаем аутентифицированный запрос, чтобы получить наши данные из БД
         const response = await fetch(`${API_BASE_URL}/api/user`, {
             headers: { 'X-Telegram-Init-Data': window.Telegram.WebApp.initData }
         });
         if (!response.ok) return;
+
         const userData = await response.json();
         
         const profileActions = document.querySelector('.profile-actions');
         const submitButton = document.getElementById('submit-app-button');
 
-        if (userData.is_admin) {
+        // Проверяем флаг is_admin из ответа сервера
+        if (userData && userData.is_admin) {
             // Если пользователь - админ, скрываем кнопку "Предложить"
             if (submitButton) submitButton.style.display = 'none';
 
             // И добавляем кнопку админ-панели, если ее еще нет
             if (profileActions && !document.getElementById('admin-panel-button')) {
                 const adminButton = document.createElement('button');
-                // ... (остальной код добавления админ-кнопки без изменений) ...
+                adminButton.id = 'admin-panel-button';
+                adminButton.className = 'action-button secondary';
+                adminButton.textContent = 'Панель администратора';
+                adminButton.addEventListener('click', () => navigateTo('admin'));
+                profileActions.appendChild(adminButton);
             }
         }
     } catch (error) {
