@@ -65,3 +65,13 @@ def get_collection_apps(collection_id):
         return jsonify(ordered_apps), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@api_apps_bp.route('/categories', methods=['GET'])
+def get_all_categories():
+    """Получение списка всех категорий."""
+    try:
+        categories_ref = db.collection('categories').stream()
+        categories_list = [cat.to_dict() for cat in categories_ref]
+        return jsonify(categories_list), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

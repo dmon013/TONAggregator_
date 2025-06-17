@@ -6,33 +6,38 @@ from utils.auth_utils import auth_required
 import json
 import datetime
 import uuid
+import traceback
 
 api_search_bp = Blueprint('api_search_bp', __name__)
 
 @api_search_bp.route('/search', methods=['GET'])
 def search_apps():
-    """Поиск приложений по названию (нечувствительный к регистру)."""
+    """Поиск приложений по названию с возможностью фильтрации по категории."""
     try:
-        query = request.args.get('query', '').strip().lower() # <--- Сразу приводим к нижнему регистру
-        if not query:
-            return jsonify([]), 200
+        query_text = request.args.get('query', '').strip().lower()
+        category_id = request.args.get('category', None) # Новый параметр
 
-        start_at = query
-        end_at = query + '\uf8ff'
+        # Начинаем строить запрос
+        apps_query = db.collection('apps').where('is_approved', '==', True)
+
+        # Если в запросе есть ID категории, добавляем его как фильтр
+        if category_id:
+            apps_query = apps_query.where('category_id', '==', category_id)
+
+        # Если есть поисковый текст, фильтруем по названию
+        if query_text:
+            end_at_text = query_text + '\uf8ff'
+            apps_query = apps_query.where('title_lowercase', '>=', query_text).where('title_lowercase', '<=', end_at_text)
         
-        apps_ref = db.collection('apps') \
-            .where('is_approved', '==', True) \
-            .where('title_lowercase', '>=', start_at) \
-            .where('title_lowercase', '<=', end_at) \
-            .limit(15) \
-            .stream()
+        apps_ref = apps_query.limit(20).stream()
             
         search_results = [app.to_dict() for app in apps_ref]
         return jsonify(search_results), 200
 
     except Exception as e:
-        # Важно! После этого изменения может потребоваться НОВЫЙ индекс.
-        # Если снова будет ошибка 500, ищи в консоли Flask новую ссылку на индекс.
+        # ВАЖНО: Если поиск с категорией вызовет ошибку 500, ищи в консоли Flask ссылку на создание нового индекса!
+        print(f"Error in search_apps: {e}")
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 @api_search_bp.route('/submit-app', methods=['POST'])

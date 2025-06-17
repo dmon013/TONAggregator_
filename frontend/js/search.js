@@ -1,4 +1,4 @@
-// frontend/js/search.js (ПОЛНАЯ ИТОГОВАЯ ВЕРСИЯ)
+// frontend/js/search.js (ПОЛНАЯ ФИНАЛЬНАЯ ВЕРСИЯ)
 
 function debounce(func, delay) {
     let timeout;
@@ -17,7 +17,7 @@ async function renderSearchPage(container, params = {}) {
     if (addMode) {
         if (params.addTarget === 'collection') {
             title = `Добавление в "${params.collectionName || ''}"`;
-            placeholder = `Найти приложение для "${params.collectionName || ''}"...`;
+            placeholder = `Найти для "${params.collectionName || ''}"...`;
         } else { // addTarget === 'my-apps'
             const slotIndex = params.slotIndex;
             title = `Выбор для ячейки #${slotIndex !== undefined ? slotIndex + 1 : '?'}`;
@@ -55,7 +55,7 @@ async function renderSearchPage(container, params = {}) {
     }, 300));
 }
 
-async function performSearch(query, resultsContainer, params, currentUserAppIds = []) {
+async function performSearch(query, resultsContainer, params, currentUserAppIds) {
     const addMode = params.addMode || false;
     query = query.trim().toLowerCase();
 
@@ -67,7 +67,12 @@ async function performSearch(query, resultsContainer, params, currentUserAppIds 
     resultsContainer.innerHTML = '<div class="loader"></div>';
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/search?query=${encodeURIComponent(query)}`);
+        const url = new URL(`${API_BASE_URL}/api/search`);
+        if (query) url.searchParams.append('query', query);
+        if (params.addTarget === 'collection' && params.collectionId) {
+             url.searchParams.append('category', params.collectionId); // Исправлено, чтобы использовать правильный параметр для бэкенда
+        }
+        const response = await fetch(url);
         if (!response.ok) throw new Error('Ошибка поиска');
         
         const results = await response.json();
@@ -94,6 +99,7 @@ async function performSearch(query, resultsContainer, params, currentUserAppIds 
 function createAppCardForAddMode(app, params, currentUserAppIds) {
     const card = document.createElement('div');
     card.className = 'app-card';
+    const tg = window.Telegram.WebApp;
 
     const isAlreadyAdded = params.addTarget === 'my-apps' && currentUserAppIds.includes(app.id);
 
@@ -115,11 +121,7 @@ function createAppCardForAddMode(app, params, currentUserAppIds) {
     } else {
         addButton.addEventListener('click', async (e) => {
             e.stopPropagation();
-            const tg = window.Telegram.WebApp;
-            
-            let apiUrl = '';
-            let body = {};
-            let successRedirectRoute = 'home';
+            let apiUrl = '', body = {}, successRedirectRoute = 'home';
 
             if (params.addTarget === 'collection') {
                 apiUrl = `${API_BASE_URL}/admin/collections/manage`;
@@ -143,7 +145,6 @@ function createAppCardForAddMode(app, params, currentUserAppIds) {
                     const errorData = await response.json();
                     throw new Error(errorData.error || 'Не удалось добавить');
                 }
-                
                 tg.HapticFeedback.notificationOccurred('success');
                 navigateTo(successRedirectRoute);
             } catch (error) {
