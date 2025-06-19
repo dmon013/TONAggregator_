@@ -1,14 +1,12 @@
-# backend/app.py (ПОЛНАЯ ФИНАЛЬНАЯ ВЕРСИЯ)
+# backend/app.py (САМАЯ ПОСЛЕДНЯЯ ВЕРСИЯ С ИСПРАВЛЕНИЕМ РЕКУРСИИ)
 
-# Загружаем переменные из .env файла в самом начале
 from dotenv import load_dotenv
 load_dotenv() 
 
-# --- Все необходимые импорты ---
-# Переименовываем request из Flask, чтобы избежать конфликта с библиотекой requests
+# ИСПРАВЛЕНИЕ 1: Мы импортируем request из Flask с другим именем 'flask_request'
 from flask import Flask, jsonify, request as flask_request, send_from_directory
 from flask_cors import CORS
-import requests
+import requests # А этот импорт для отправки сообщений остается как есть
 import json
 import os
 import traceback
@@ -36,12 +34,12 @@ app.register_blueprint(api_search_bp, url_prefix='/api')
 
 # --- Обработка команд бота через Webhook ---
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-WEB_APP_URL = os.getenv('WEB_APP_URL') 
+WEB_APP_URL = os.getenv('WEB_APP_URL')
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
     """Этот эндпоинт принимает обновления от Telegram."""
-    # Используем наше новое имя flask_request, чтобы не было конфликта
+    # ИСПРАВЛЕНИЕ 2: Используем наше новое имя flask_request
     update = flask_request.get_json()
     
     if "message" in update and "chat" in update["message"] and "id" in update["message"]["chat"]:
@@ -58,7 +56,7 @@ def send_welcome_message(chat_id):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     
     if not WEB_APP_URL:
-        print("❌ WEB_APP_URL не задан в .env файле! Не могу отправить кнопку.")
+        print("❌ WEB_APP_URL не задан в .env файле!")
         return
 
     web_app_button = {"text": "🚀 Открыть Агрегатор", "web_app": {"url": WEB_APP_URL}}
@@ -71,9 +69,9 @@ def send_welcome_message(chat_id):
     }
     
     try:
-        # Здесь используется библиотека requests, а не объект из Flask
+        # Здесь по-прежнему используется библиотека requests, и теперь конфликта нет
         api_response = requests.post(url, data=payload)
-        api_response.raise_for_status() # Проверяем, что запрос прошел успешно
+        api_response.raise_for_status()
         print(f"✅ Приветственное сообщение отправлено пользователю {chat_id}")
     except Exception as e:
         print(f"❌ Ошибка отправки сообщения: {e}")
