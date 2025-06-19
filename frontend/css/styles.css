@@ -38,7 +38,7 @@ body {
 .hint-text, .error-text { color: var(--tg-theme-hint-color); text-align: center; padding: 20px; }
 .error-text { color: #E53935; }
 .action-button { width: 100%; padding: 14px; background-color: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); border: none; border-radius: 10px; font-size: 16px; font-weight: 500; cursor: pointer; }
-.action-button.secondary { background-color: var(--card-bg-color); color: var(--tg-theme-text-color); margin-top: 10px; }
+.action-button.secondary { background-color: var(--card-bg-color); color: var(--tg-theme-text-color); }
 
 
 /* ==========================================================================

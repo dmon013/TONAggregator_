@@ -36,6 +36,7 @@ async function renderAdminPage(container) {
         
         const adminContent = document.getElementById('admin-content');
         const tabs = document.querySelectorAll('.admin-tab-button');
+        setupBackButton(container);
 
         const renderTabContent = (tabName) => {
             switch (tabName) {

@@ -2,12 +2,13 @@
  * Отрисовывает страницу профиля пользователя.
  * @param {HTMLElement} container - Элемент для рендеринга
  */
+// frontend/js/profile.js (заменить функцию renderProfilePage)
 function renderProfilePage(container) {
     const tg = window.Telegram.WebApp;
     const user = tg.initDataUnsafe.user;
-
     const displayName = [user?.first_name, user?.last_name].filter(Boolean).join(' ');
 
+    // Сначала рисуем HTML с ПУСТЫМ блоком .profile-actions
     container.innerHTML = `
         <div class="profile-page">
             <div class="profile-header">
@@ -15,54 +16,45 @@ function renderProfilePage(container) {
                 <h1 class="profile-username">${displayName || 'User'}</h1>
                 <p class="profile-telegram-id">@${user?.username || 'username'}</p>
             </div>
-            <div class="profile-actions">
-                <button id="submit-app-button" class="action-button">Предложить приложение</button>
-            </div>
+            <div class="profile-actions"></div>
         </div>
     `;
     
-    // Вызываем проверку на админа
-    checkAndAddAdminButton();
-
-    document.getElementById('submit-app-button').addEventListener('click', () => {
-        showSubmissionModal();
-    });
+    // А теперь вызываем функцию, которая наполнит этот блок правильной кнопкой
+    populateProfileActions();
 }
 
 /**
  * Делает запрос к API, чтобы проверить, является ли пользователь админом,
  * и если да, то добавляет кнопку входа в админ-панель.
  */
-async function checkAndAddAdminButton() {
+async function populateProfileActions() {
+    const profileActions = document.querySelector('.profile-actions');
+    if (!profileActions) return;
+
     try {
-        // Делаем аутентифицированный запрос, чтобы получить наши данные из БД
-        const response = await fetch(`${API_BASE_URL}/api/user`, {
-            headers: { 'X-Telegram-Init-Data': window.Telegram.WebApp.initData }
-        });
-        if (!response.ok) return;
+        const response = await fetch(`${API_BASE_URL}/api/user`, { headers: { 'X-Telegram-Init-Data': window.Telegram.WebApp.initData } });
+        const userData = response.ok ? await response.json() : null;
 
-        const userData = await response.json();
-        
-        const profileActions = document.querySelector('.profile-actions');
-        const submitButton = document.getElementById('submit-app-button');
-
-        // Проверяем флаг is_admin из ответа сервера
         if (userData && userData.is_admin) {
-            // Если пользователь - админ, скрываем кнопку "Предложить"
-            if (submitButton) submitButton.style.display = 'none';
-
-            // И добавляем кнопку админ-панели, если ее еще нет
-            if (profileActions && !document.getElementById('admin-panel-button')) {
-                const adminButton = document.createElement('button');
-                adminButton.id = 'admin-panel-button';
-                adminButton.className = 'action-button secondary';
-                adminButton.textContent = 'Панель администратора';
-                adminButton.addEventListener('click', () => navigateTo('admin'));
-                profileActions.appendChild(adminButton);
-            }
+            // Если админ, добавляем кнопку админки
+            const adminButton = document.createElement('button');
+            adminButton.id = 'admin-panel-button';
+            adminButton.className = 'action-button'; // Убираем класс .secondary
+            adminButton.textContent = 'Панель администратора';
+            adminButton.addEventListener('click', () => navigateTo('admin'));
+            profileActions.appendChild(adminButton);
+        } else {
+            // Если обычный юзер, добавляем кнопку "Предложить"
+            const submitButton = document.createElement('button');
+            submitButton.id = 'submit-app-button';
+            submitButton.className = 'action-button';
+            submitButton.textContent = 'Предложить приложение';
+            submitButton.addEventListener('click', () => showSubmissionModal());
+            profileActions.appendChild(submitButton);
         }
     } catch (error) {
-        console.error("Failed to check admin status:", error);
+        console.error("Failed to populate profile actions:", error);
     }
 }
 

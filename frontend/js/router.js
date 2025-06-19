@@ -1,23 +1,12 @@
-// frontend/js/router.js (ОБНОВЛЕННАЯ ВЕРСИЯ)
+// frontend/js/router.js (ФИНАЛЬНАЯ РАБОЧАЯ ВЕРСИЯ)
 
 const routes = {};
-
 let appContainerElement;
 let navigationButtons;
-let historyStack = ['home']; // Стек для хранения истории, начинаем с главной
 
-// Новая функция для навигации назад
-function navigateBack() {
-    if (historyStack.length > 1) {
-        historyStack.pop(); // Удаляем текущую страницу из истории
-        const previousRoute = historyStack[historyStack.length - 1];
-        // Переходим на предыдущую страницу без добавления в историю
-        navigateTo(previousRoute, {}, true);
-    } else {
-        navigateTo('home'); // Если истории нет, переходим на главную
-    }
-}
-
+/**
+ * Инициализирует роутер, привязывая события к кнопкам навигации.
+ */
 function initRouter(container, navButtons) {
     appContainerElement = container;
     navigationButtons = Array.from(navButtons);
@@ -25,30 +14,47 @@ function initRouter(container, navButtons) {
     navigationButtons.forEach(button => {
         button.addEventListener('click', (event) => {
             const route = event.currentTarget.dataset.route;
-            navigateTo(route);
+            navigateTo(route, {}, true); // Принудительно очищаем историю при клике на нижнее меню
         });
     });
+
+    // Обработка системной кнопки "назад" браузера
+    window.onpopstate = (event) => {
+        if (event.state) {
+            navigateTo(event.state.routeName, event.state.params, true);
+        } else {
+            navigateTo('home', {}, true);
+        }
+    };
 }
 
-function navigateTo(routeName, params = {}, isNavigatingBack = false) {
+/**
+ * Главная функция навигации.
+ * @param {string} routeName - Имя маршрута.
+ * @param {object} params - Параметры для страницы.
+ * @param {boolean} fromNav - Флаг, указывающий, что это навигация из главного меню.
+ */
+function navigateTo(routeName, params = {}, fromNav = false) {
     const renderFunction = routes[routeName];
-
+    
     if (!appContainerElement) {
         console.error("Router not initialized. Call initRouter() first.");
         return;
     }
 
+    // Управляем историей браузера для работы стрелок "вперед/назад"
+    if (!fromNav) {
+        const url = `#${routeName}`;
+        history.pushState({ routeName, params }, '', url);
+    } else {
+        history.replaceState({ routeName, params }, '', `#${routeName}`);
+    }
+
+    // Очищаем контейнер и прячем системную кнопку "Назад" перед отрисовкой
     appContainerElement.innerHTML = '';
     window.Telegram.WebApp.BackButton.hide();
-
-    if (!isNavigatingBack && routeName !== historyStack[historyStack.length - 1]) {
-        historyStack.push(routeName);
-    }
-    // Ограничим размер истории, чтобы не занимать много памяти
-    if (historyStack.length > 10) {
-        historyStack.shift();
-    }
-
+    
+    // Вызываем функцию отрисовки для нужной страницы
     if (renderFunction) {
         renderFunction(appContainerElement, params);
     } else {
@@ -56,36 +62,41 @@ function navigateTo(routeName, params = {}, isNavigatingBack = false) {
         console.warn(`No route found for: ${routeName}`);
     }
 
-    const isNavRoute = Array.from(navigationButtons).some(b => b.dataset.route === routeName);
-    if (isNavRoute) {
-        navigationButtons.forEach(button => {
-            button.classList.toggle('active', button.dataset.route === routeName);
-        });
-    } else {
-        navigationButtons.forEach(button => button.classList.remove('active'));
-    }
+    // Обновляем активное состояние кнопок в нижней навигационной панели
+    navigationButtons.forEach(button => {
+        button.classList.toggle('active', button.dataset.route === routeName);
+    });
 }
 
 /**
- * Устанавливает кнопку "Назад", используя нативную кнопку Telegram, если возможно,
- * или создавая HTML-кнопку в качестве запасного варианта.
- * @param {HTMLElement} container - Контейнер страницы, куда можно добавить HTML-кнопку.
+ * Устанавливает кнопку "Назад", используя нативную кнопку Telegram или HTML-аналог.
  */
 function setupBackButton(container) {
     const tg = window.Telegram.WebApp;
+    
+    // Функция для возврата назад
+    const goBack = () => window.history.back();
 
-    if (tg.isVersionAtLeast('6.1')) { // Проверяем, поддерживает ли клиент кнопку
-        tg.BackButton.show();
-        // Удаляем старые обработчики перед добавлением нового, чтобы избежать дублирования
-        tg.BackButton.offClick(navigateBack); 
-        tg.BackButton.onClick(navigateBack);
+    if (tg.BackButton.isVisible) {
+        // Если уже видима, просто обновляем обработчик
+        tg.BackButton.offClick(goBack);
+        tg.BackButton.onClick(goBack);
     } else {
-        // Запасной вариант для браузера или старых клиентов
-        const fallbackButton = document.createElement('button');
-        fallbackButton.textContent = '← Назад';
-        fallbackButton.className = 'fallback-back-button';
-        fallbackButton.addEventListener('click', navigateBack);
-        // Вставляем кнопку в начало контейнера страницы
-        container.prepend(fallbackButton);
+        if (tg.isVersionAtLeast('6.1')) {
+            tg.BackButton.show();
+            tg.BackButton.onClick(goBack);
+        } else {
+            // Запасной вариант для браузера
+            const fallbackButton = document.createElement('button');
+            fallbackButton.textContent = '← Назад';
+            fallbackButton.className = 'fallback-back-button';
+            fallbackButton.addEventListener('click', goBack);
+            container.prepend(fallbackButton);
+        }
     }
 }
+
+// Первоначальная загрузка
+document.addEventListener('DOMContentLoaded', () => {
+    // ... (код из main.js будет здесь, но для ясности оставим его там)
+});

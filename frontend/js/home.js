@@ -48,14 +48,14 @@ async function renderHomePage(container) {
         });
 
         // Добавляем плейсхолдер для создания новой подборки для админа
-        if (isAdmin) {
-             const placeholder = document.createElement('div');
-             placeholder.className = 'add-collection-placeholder';
-             placeholder.textContent = '+ Создать новую подборку';
-             placeholder.style.display = 'none'; // По умолчанию скрыт
-             placeholder.onclick = () => navigateTo('admin', { openTab: 'collections' });
-             collectionsContainer.appendChild(placeholder);
-        }
+        // if (isAdmin) {
+        //      const placeholder = document.createElement('div');
+        //      placeholder.className = 'add-collection-placeholder';
+        //      placeholder.textContent = '+ Создать новую подборку';
+        //      placeholder.style.display = 'none'; // По умолчанию скрыт
+        //      placeholder.onclick = () => navigateTo('admin', { openTab: 'collections' });
+        //      collectionsContainer.appendChild(placeholder);
+        // }
 
         // Добавляем логику для кнопки "Управлять"
         if (isAdmin) {

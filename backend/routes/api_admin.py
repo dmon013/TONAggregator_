@@ -110,32 +110,17 @@ def get_submissions():
 @api_admin_bp.route('/submissions/<string:submission_id>/approve', methods=['POST'])
 @admin_required
 def approve_submission(submission_id):
-    """Одобряет заявку и создает на ее основе новое приложение."""
+    """Одобряет заявку (только меняет ее статус)."""
     try:
         submission_ref = db.collection('app_submissions').document(submission_id)
-        submission_doc = submission_ref.get()
-        if not submission_doc.exists:
+        if not submission_ref.get().exists:
             return jsonify({"error": "Submission not found"}), 404
         
-        submission_data = submission_doc.to_dict()
-        title = submission_data.get('title')
-        app_id = str(uuid.uuid4())
-        
-        new_app_data = {
-            "id": app_id, "title": title, "title_lowercase": title.lower() if title else "",
-            "short_description": submission_data.get('description', 'Описание не предоставлено.'),
-            "long_description": submission_data.get('description', 'Описание не предоставлено.'),
-            "app_url": submission_data.get('app_url'), "category_id": "other",
-            "icon_url": f"https://placehold.co/128x128/grey/white?text={title[0] if title else '?'}",
-            "is_approved": True, "created_at": datetime.datetime.utcnow(), "collection_ids": [],
-        }
-        
-        db.collection('apps').document(app_id).set(new_app_data)
+        # Просто обновляем статус заявки на "одобрено"
         submission_ref.update({"status": "approved"})
         return jsonify({"status": "success", "message": f"Submission {submission_id} approved."}), 200
     except Exception as e:
-        print(f"Error in approve_submission: {e}")
-        traceback.print_exc()
+        print(f"Error in approve_submission: {e}"); traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 

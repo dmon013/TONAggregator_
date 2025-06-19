@@ -1,9 +1,10 @@
-# backend/routes/api_apps.py (ПОЛНАЯ ИТОГОВАЯ ВЕРСИЯ)
+# backend/routes/api_apps.py (ПОЛНАЯ ФИНАЛЬНАЯ ВЕРСИЯ)
 
 from flask import Blueprint, jsonify
 from firebase_service import db
 
 api_apps_bp = Blueprint('api_apps_bp', __name__)
+
 
 @api_apps_bp.route('/apps', methods=['GET'])
 def get_all_apps():
@@ -14,6 +15,7 @@ def get_all_apps():
         return jsonify(apps_list), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @api_apps_bp.route('/apps/<string:app_id>', methods=['GET'])
 def get_app_details(app_id):
@@ -28,6 +30,7 @@ def get_app_details(app_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 @api_apps_bp.route('/collections', methods=['GET'])
 def get_all_collections():
     """Получение списка всех подборок."""
@@ -35,14 +38,16 @@ def get_all_collections():
         collections_ref = db.collection('collections').stream()
         collections_list = []
         for col in collections_ref:
+            # Превращаем документ в словарь
             col_data = col.to_dict()
+            # И принудительно добавляем ID самого документа в этот словарь
             col_data['id'] = col.id
             collections_list.append(col_data)
         return jsonify(collections_list), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ЭТОТ МАРШРУТ - КЛЮЧ К РЕШЕНИЮ. УБЕДИСЬ, ЧТО ОН ВЫГЛЯДИТ ИМЕННО ТАК.
+
 @api_apps_bp.route('/collection-apps/<string:collection_id>', methods=['GET'])
 def get_collection_apps(collection_id):
     """Получение приложений для ОДНОЙ подборки."""
@@ -59,16 +64,17 @@ def get_collection_apps(collection_id):
         # Этот запрос требует композитного индекса (is_approved, id)
         apps_ref = db.collection('apps').where('is_approved', '==', True).where('id', 'in', app_ids).stream()
         
-        apps_map = {app.id: app.to_dict() for app in apps_ref}
+        apps_map = {doc.id: doc.to_dict() for doc in apps_ref}
         ordered_apps = [apps_map[app_id] for app_id in app_ids if app_id in apps_map]
         
         return jsonify(ordered_apps), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
+
 @api_apps_bp.route('/categories', methods=['GET'])
 def get_all_categories():
-    """Получение списка всех категорий."""
+    """Получение списка всех категорий для фильтров."""
     try:
         categories_ref = db.collection('categories').stream()
         categories_list = [cat.to_dict() for cat in categories_ref]

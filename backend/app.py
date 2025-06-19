@@ -79,6 +79,17 @@ def send_welcome_message(chat_id):
 def index():
     return jsonify({"status": "ok", "message": "TONAggregator backend is running!"})
 
+#сервер
+@app.route('/')
+def serve_index():
+    # Мы указываем путь к папке frontend относительно текущего файла app.py
+    return send_from_directory('../frontend', 'index.html')
+
+# Этот маршрут будет отдавать все остальные файлы (css, js, картинки)
+@app.route('/<path:path>')
+def serve_static_files(path):
+    return send_from_directory('../frontend', path)
+
 # --- Запуск приложения ---
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
